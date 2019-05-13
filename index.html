@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en"> 
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Test Game</title>
+
+		<style type="text/css">
+			canvas {
+				position: absolute;
+				width: 800px;
+				height: 600px;
+				left: 50%;
+				top: 50%;
+				margin-left: -400px; /* This is half the width */
+				margin-top: -300px; /* This is half the height */
+			}
+		</style>
+
+	</head>
+
+	<body>
+		<div>
+		<canvas id="levelCanvas" width="800" height="600" style="border:10px solid #FF0000;">
+		Guttted mush, your browser's pants.
+		</canvas> 
+		</div>
+		
+		
+		<img id="floor_tile_00" width="32" height="32" src="images/floor_tile_00.png" alt="floor_tile_00" style="display:none">
+		<img id="floor_tile_01" width="32" height="32" src="images/floor_tile_01.png" alt="floor_tile_01" style="display:none">
+		<img id="mario" width="32" height="32" src="images/deano_walk.gif" alt="it's only flippin' Mario!" style="display:none">
+		
+		
+		<script>
+		
+		var COLOR  = { BLACK: '#000000', YELLOW: '#ECD078', SKY: '#8888FF', PINK: '#C02942', PURPLE: '#542437', GREY: '#333', SLATE: '#53777A', WHITE: '#FFFFFF' },
+			COLORS = [ COLOR.BLACK, COLOR.YELLOW, COLOR.SKY, COLOR.PINK, COLOR.PURPLE, COLOR.GREY, COLOR.WHITE ];
+
+		var MAP      = { tileX: 25, tileY: 19 }, // the size of the map (in tiles)
+			TILE     = 32,                 // the size of each tile (in game pixels)
+			METER    = TILE,               // abitrary choice for 1m
+			GRAVITY  = METER * 9.8 * 6,    // very exagerated gravity (6x)
+			MAXDX    = METER * 20,         // max horizontal speed (20 tiles per second)
+			MAXDY    = METER * 60,         // max vertical speed   (60 tiles per second)
+			ACCEL    = MAXDX * 2,          // horizontal acceleration -  take 1/2 second to reach maxdx
+			FRICTION = MAXDX * 6,          // horizontal friction     -  take 1/6 second to stop from maxdx
+			JUMP     = METER * 1500;       // (a large) instantaneous jump impulse
+			KEY      = { SPACE: 32, LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
+
+		var canvas   = document.getElementById('levelCanvas'),
+			ctx      = canvas.getContext('2d'),
+			width    = canvas.width  = MAP.tileX * TILE,
+			height   = canvas.height = MAP.tileY * TILE,
+			player   = { x: 320, y: 320, dx: 0, dy: 0 };
+			
+		var t2p      = function(t)     {return t*TILE;                  },
+			p2t      = function(p)     {return Math.floor(p/TILE);      },
+			cell     = function(x,y)   {return tcell(p2t(x),p2t(y));    },
+			tcell    = function(tx,ty) {return cells[tx + (ty*MAP.tw)]; };
+			
+		var player 
+		x = 0,
+		y = 0,
+		direction = 0,
+		moving = 0,
+		alive = 1;
+		
+						
+		var level001 = [
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+		[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+		[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+		[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+		];
+		
+		function initPlayer(){
+			for(y=0;y<19;y++){
+				if(level001[y][3] !== 0){
+					player.y = (y-4) * TILE;
+					player.x = 3 * TILE;
+				}
+			}
+		};
+		
+		initPlayer();
+		
+		var floor_00 = document.getElementById('floor_tile_00');
+		var floor_01 = document.getElementById('floor_tile_01');
+		var playerImage = document.getElementById('mario');
+		/*
+		floor_00.src = "../../floor_tile_00.png";
+		floor_01.src = "../../floor_tile_01.png";
+		playerImage.src = "../../mario.gif";
+		*/
+		function drawTile(sourceImage, x, y){
+			if(sourceImage.complete){
+				ctx.drawImage(sourceImage, x, y)
+			}else{
+				ctx.fillStyle = COLOR.PINK;
+				ctx.fillRect(x, y, TILE, TILE);
+			}
+		}
+				
+		function timestamp() {
+		  if (window.performance && window.performance.now)
+			return window.performance.now();
+		  else
+			return new Date().getTime();
+		}
+		
+		var fps  = 60,
+			step = 1/fps,
+			dt   = 0,
+			now, last = timestamp(),
+			cells = [];
+
+		function frame() {
+		  now = timestamp();
+		  dt = dt + Math.min(1, (now - last) / 1000);
+		  while(dt > step) {
+			dt = dt - step;
+			update(step);
+		  }
+		  last = now;
+		  requestAnimationFrame(frame, canvas);
+		}
+
+		frame(); // start the first frame
+
+		function drawPlayer(ctx){	
+			drawTile(playerImage, player.x, player.y);
+		}
+		
+		function drawLevel(ctx){
+			for(y=0;y<19;y++){
+				for(x=0;x<25;x++){
+					
+					if(level001[y][x] === 1){
+						if(level001[y-1][x] === 0){
+							drawTile(floor_00, x * TILE, y * TILE);
+						}else{
+							drawTile(floor_01, x * TILE, y * TILE);
+						}
+						
+					}else{
+						ctx.fillStyle = COLOR.SKY;
+						ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
+
+					}
+					
+					
+					
+				}
+			}
+
+		};
+		
+		function update(dt){
+		  drawLevel(ctx, dt);
+		  drawPlayer(ctx);
+    	};
+
+		
+		document.addEventListener('keydown', function(ev) { return onkey(ev, ev.keyCode, true);  }, false);
+		document.addEventListener('keyup',   function(ev) { return onkey(ev, ev.keyCode, false); }, false);
+		
+		ctx.font = "30px Arial";
+		
+		function onkey(ev, key, down) {
+		  switch(key) {
+//			case KEY.LEFT:  player.left  = down; return false;
+//			case KEY.RIGHT: player.right = down; return false;
+			case KEY.LEFT:  player.x = player.x - 5; return false;
+			case KEY.RIGHT: player.x = player.x + 5; return false;
+			case KEY.SPACE: player.jump  = down; return false;
+		  }
+		}
+
+		
+		//floor_01.onload = function(){
+		//	drawLevel(ctx);
+		//};
+		
+		</script>
+
+		
+		
+		
+	</body>
+
+</html>
