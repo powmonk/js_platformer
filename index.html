@@ -23,12 +23,14 @@
 		</canvas> 
 		</div>
 		
-		
+		<!-- We need to load images this way for the LMS to load them in the right folder-->
 		<img id="floor_tile_00" width="32" height="32" src="images/floor_tile_00.png" alt="floor_tile_00" style="display:none">
 		<img id="floor_tile_01" width="32" height="32" src="images/floor_tile_01.png" alt="floor_tile_01" style="display:none">
 		<img id="hit_box" width="32" height="32" src="images/hit_box.png" alt="hit_box"style="display:none">
-		<img id="deano" width="32" height="32" src="images/deano_walk.gif" alt="it's only flippin' Deano!" style="display:none">
+		<img id="deano" width="32" height="64" src="images/deano_walk.gif" alt="it's only flippin' Deano!" style="display:none">
+		<img id="deano_walk" width="32" height="64" src="images/deano_spritesheet.png" alt="it's only flippin' Deano! Now he's only bloody walkin'!" style="display:none">
 		<img id="coin" width="320" height="32" src="images/coin_spritesheet.png" alt="coin" style="display:none">
+		<img id="cache" src="" alt="cache" style="display:none">
 		
 		
 		<script>
@@ -57,7 +59,7 @@
 			cell     = function(x,y)   {return tcell(p2t(x),p2t(y));    },
 			tcell    = function(tx,ty) {return cells[tx + (ty*MAP.tw)]; };
 			
-		var player = {x:0, y:0,	direction:1, moving:0, alive:1, dx:0, dy:0};
+		var player = {x:0, y:0,	direction:"stop", face:"right", speed:0, alive:1,frame:0};
 		
 						
 		var level001 = [
@@ -83,6 +85,15 @@
 		[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 		];
 		
+		var floor_00 = document.getElementById('floor_tile_00');
+		var floor_01 = document.getElementById('floor_tile_01');
+		var hitbox = document.getElementById('hit_box');
+		var playerImage = document.getElementById('deano');
+		var playerWalk = document.getElementById('deano_walk');
+		var coinImage = document.getElementById('coin');
+		var coincount=0;
+		var frameDelay = 0;
+		
 		function initPlayer(){
 			//player.x = 3 * TILE;
 			//player.y = 14 * TILE;
@@ -97,19 +108,6 @@
 		
 		initPlayer();
 		
-		var floor_00 = document.getElementById('floor_tile_00');
-		var floor_01 = document.getElementById('floor_tile_01');
-		var hitbox = document.getElementById('hit_box');
-		var playerImage = document.getElementById('deano');
-		var coinImage = document.getElementById('coin');
-		var coincount=0;
-		
-		
-		/*
-		floor_00.src = "../../floor_tile_00.png";
-		floor_01.src = "../../floor_tile_01.png";
-		playerImage.src = "../../mario.gif";
-		*/
 		function drawTile(sourceImage, x, y){
 			if(sourceImage.complete){
 				ctx.drawImage(sourceImage, x, y)
@@ -118,24 +116,73 @@
 				ctx.fillRect(x, y, TILE, TILE);
 			}
 		}
-		var frameDelay = 0;
 		
-		function drawCoin(ctx, x=32, y=32){
-			if(frameDelay<=10){
+		function getAnimStep(){
+			if(frameDelay<6){
 				frameDelay++;
+				return false;
 			}else{
 				frameDelay = 0;
+				return true;
 			}
-			
+		
+		}
+		
+		function drawCoin(ctx, x=32, y=32){
 			if(coincount < 9 ){
 				ctx.drawImage(coinImage, 32*coincount,0,32,32,x,y,32,32);
-				if(frameDelay === 0){
+				if(getAnimStep()){
 					coincount++;
 				}
 			}else{
 				coincount=0;
 			};		
 		};
+
+		function drawPlayer(ctx){
+			var playerFrameCount = 5;
+			
+			if(player.speed>0){
+				if(player.frame<playerFrameCount){
+					if(getAnimStep())
+						player.frame++;
+				}else{
+					player.frame=0;
+				};
+			}else{
+				player.frame=0;
+			};
+			
+			if(player.face==="left"){
+				// image, slice x, slice y, slice width, slice height, dest x, dest y, dest width, dest height
+				ctx.drawImage(playerWalk, 32*player.frame,0,32,64,player.x,player.y,32,64);
+			
+				//ctx.drawImage(playerWalk, player.x, player.y);
+			
+			}else if(player.face === "right"){
+				mirrorImage(ctx, playerWalk, player.x, player.y, true, false, player.frame);
+			};
+		};
+		
+		function mirrorImage(ctx, image, x, y, horizontal = false, vertical = false, frame){
+			ctx.save();  // save the current canvas state
+			
+			var a = horizontal ? -1 : 1; // set the direction of x axis
+			var b = 0; 
+			var c = 0;
+			var d = vertical ? -1 : 1; //// set the direction of y axis
+//			var e = x + horizontal ? image.width : 0; // set the x origin
+//			var f = y + vertical ? image.height : 0 ; // set the y origin
+			var e = horizontal ? player.x + image.width : player.x; // set the x origin
+			var f = vertical   ? player.y + image.height: player.y; // set the y origin
+			
+			
+			ctx.setTransform(a,b,c,d,e,f);
+			//ctx.drawImage(image,0,0);
+			ctx.drawImage(image, 32*frame,0,32,64,0,0,32,64);
+			ctx.restore(); // restore the state as it was when this function was called
+		}		
+
 		
 		function timestamp() {
 		  if (window.performance && window.performance.now)
@@ -167,33 +214,7 @@
 		}
 
 		frame(); // start the first frame
-
-		function drawPlayer(ctx){
-			if(player.direction===0){
-				ctx.drawImage(playerImage, player.x, player.y);
-			}else{			
-				mirrorImage(ctx, playerImage, player.x, player.y, true, false);
-			};
-		};
-		
-		function mirrorImage(ctx, image, x, y, horizontal = false, vertical = false){
-			ctx.save();  // save the current canvas state
-			
-			var a = horizontal ? -1 : 1; // set the direction of x axis
-			var b = 0; 
-			var c = 0;
-			var d = vertical ? -1 : 1; //// set the direction of y axis
-//			var e = x + horizontal ? image.width : 0; // set the x origin
-//			var f = y + vertical ? image.height : 0 ; // set the y origin
-			var e = horizontal ? player.x + image.width : player.x; // set the x origin
-			var f = vertical   ? player.y + image.height: player.y; // set the y origin
-			
-			
-			ctx.setTransform(a,b,c,d,e,f);
-			ctx.drawImage(image,0,0);
-			ctx.restore(); // restore the state as it was when this function was called
-		}		
-		
+				
 		function drawLevel(ctx){
 		
 			for(y=0;y<MAP.tileY;y++){
@@ -237,11 +258,15 @@
 		};
 		
 		function onkey(ev, key, down) {
-			switch(key) {
-				case KEY.LEFT:  player.direction = "-1"; /*console.log("left");*/return false;break;
-				case KEY.RIGHT: player.direction =  "1"; /*console.log("right");*/return false;break;
-				case KEY.SPACE: player.direction =  "3"; /*console.log("space");*/return false;break;
-				default: 		player.direction =  "0"; /*console.log("no key pressed");*/return false;break;
+			if(down){
+				switch(key) {
+					case KEY.LEFT:  player.direction = "left";return false;break;
+					case KEY.RIGHT: player.direction =  "right";return false;break;
+					case KEY.SPACE: player.direction =  "jump";return false;break;
+					default: 		player.direction =  "stop";return false;break;
+				};
+			}else{
+				player.direction =  "stop";
 			};
 		};
 				
@@ -254,19 +279,25 @@
 		
 		function movePlayer(){
 			if(inLMS){
-				player.direction = VarDirection.getValue()			;
+				player.direction = VarDirection.getValue();
 			}
 			
 			//console.log(player.direction);
 			
 			switch(player.direction){
-				case "1":
-					player.x = player.x + 1 ;break;
-				case "-1":
-					player.x = player.x - 1;break;
-				case "3":
+				case "right":
+					player.face="right";
+					player.speed=1; console.log("right");
+					player.x = player.x + player.speed ;break;
+				case "left":
+					player.face="left";
+					player.speed=1; console.log("left");
+					player.x = player.x - player.speed;break;
+				case "jump":
 					player.jump = true;
 				default:
+					player.speed = 0;
+					player.direction = "stop";
 					break;
 			};
 			
