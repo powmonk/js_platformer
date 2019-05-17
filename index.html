@@ -28,7 +28,8 @@
 		<img id="floor_tile_01" width="32" height="32" src="images/floor_tile_01.png" alt="floor_tile_01" style="display:none">
 		<img id="hit_box" width="32" height="32" src="images/hit_box.png" alt="hit_box"style="display:none">
 		<img id="deano" width="32" height="64" src="images/deano_walk.gif" alt="it's only flippin' Deano!" style="display:none">
-		<img id="deano_walk" width="32" height="64" src="images/deano_spritesheet.png" alt="it's only flippin' Deano! Now he's only bloody walkin'!" style="display:none">
+		<!--<img id="deano_walk" width="32" height="64" src="images/deano_spritesheet.png" alt="it's only flippin' Deano! Now he's only bloody walkin'!" style="display:none">-->
+		<img id="deano_walk" width="32" height="64" src="images/apple_rick.png" alt="it's only flippin' Deano! Now he's only bloody walkin'!" style="display:none">
 		<img id="coin" width="320" height="32" src="images/coin_spritesheet.png" alt="coin" style="display:none">
 		<img id="cache" src="" alt="cache" style="display:none">
 		
@@ -135,10 +136,14 @@
 			};		
 		};
 
-		function drawPlayer(ctx){
-			var playerFrameCount = 5;
+		function updatePlayer(ctx){
+			var playerFrameCount = 6;
 			
-			if(player.speed>0){
+			if(player.moving){
+				movePlayer();
+			};
+			
+			if(player.moving){
 				if(player.frame<playerFrameCount){
 					if(getAnimStep())
 						player.frame++;
@@ -181,23 +186,22 @@
 		};		
 		
 		function collide(entity, position){
-			//console.log("y pixel:"+entity.y);
-			//console.log("x pixel:"+entity.x);
-			//console.log("y tile:"+p2t(entity.y));
-			//console.log("x tile:"+p2t(entity.x));
-			//console.log("array result:"+level001[p2t(entity.y+entity.height)][p2t(entity.x)]);
-			
 			switch(position){
 				case "feet":
 					if(level001[p2t(entity.y+(entity.height))][p2t(entity.x)] || level001[p2t(entity.y+(entity.height-5))][p2t(entity.x+entity.width)] !== 0 )
 						return true;
 					break;
 
-				case "right":
-					if(level001[p2t(player.y)][p2t(player.x+player.width)] || level001[p2t(player.y+player.height-2)][p2t(player.x+player.width)] !== 0 )
+				case "left":
+					if(level001[p2t(entity.y)][p2t(entity.x)] 				|| level001[p2t(entity.y)][p2t(entity.x)] !== 0 )
 						return true;
 					break;
-			
+                
+				case "right":
+					if(level001[p2t(entity.y)][p2t(entity.x+entity.width)] 	|| level001[p2t(entity.y)][p2t(entity.x+entity.width)] !== 0 )
+						return true;
+					break;
+			    
 				default:
 					return false;
 					break;
@@ -205,12 +209,8 @@
 		}
 		
 		function logger(){
-			for(var i=0;i<648;i++){
-				var x = Math.floor(i/TILE);
-				console.log("x==="+x);
-			}
+			console.log(timestamp());
 		}
-		//logger();
 		
 		function timestamp() {
 		  if (window.performance && window.performance.now)
@@ -218,6 +218,8 @@
 		  else
 			return new Date().getTime();
 		}
+		
+	
 		
 		var fps  = 60,
 			step = 1/fps,
@@ -288,53 +290,46 @@
 		function onkey(ev, key, down) {
 			if(down){
 				switch(key) {
-					case KEY.LEFT:  player.moving = true; player.face = "left";console.log("you pressed the left key");break;
-					case KEY.RIGHT: player.moving = true; player.face = "right";console.log("you pressed the right key");break;
+					case KEY.LEFT:  player.moving = true; player.face = "left";console.log("you pressed the left key, player x:"+player.x);break;
+					case KEY.RIGHT: player.moving = true; player.face = "right";console.log("you pressed the right key, player x:"+player.x);break;
 					case KEY.SPACE: player.jump = true;break;
 					//default: 		player.direction =  "stop";return false;break;
 				};
 			}else{
-				player.direction =  "stop";
+				player.moving =  false;
 			};
 		};
 				
 		function update(dt){
 			drawLevel(ctx, dt);
-			drawPlayer(ctx);
-			movePlayer();
+			updatePlayer(ctx);
+
 		};
 
 		
 		function movePlayer(){
 			if(inLMS){
+				//This bit is currently not working, I need to adapt it to lectora's input methods
+				switch(key) {
+					case KEY.LEFT:  player.moving = true; player.face = "left";console.log("you pressed the left key, player x:"+player.x);break;
+					case KEY.RIGHT: player.moving = true; player.face = "right";console.log("you pressed the right key, player x:"+player.x);break;
+					case KEY.SPACE: player.jump = true;break;
+					//default: 		player.direction =  "stop";return false;break;
+				};
 				player.direction = VarDirection.getValue();
 			}
 			
-			//console.log(player.direction);
-			
-			switch(player.direction){
-				case "right":
-					player.face = "right"
-					
-					
-				case "left":
-					
-				
-				case "jump":
-					player.jump = true;
-				default:
-					player.speed = 0;
-					player.direction = "stop";
-					break;
-			};
-
-			if(!collide(player, "right")){
-				player.face="right";
-				player.speed=1; console.log(player.face);
-				player.x = player.x + player.speed ;break;
+			if(player.moving){	
+				if(!collide(player, player.face)){
+					if(player.face === "right")
+						player.x = player.x + 1;
+					if(player.face === "left")
+						player.x = player.x - 1;
+				};
 			}else{
-				console.log("There's something to your right");
-			}
+					player.speed = 0;
+					console.log("There's something in front of you ");
+			};
 		};
 		
 		</script>
