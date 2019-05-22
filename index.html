@@ -32,6 +32,7 @@
 		<!--<img id="deano_walk" width="32" height="64" src="images/apple_rick.png" alt="it's only flippin' Deano! Now he's only bloody walkin'!" style="display:none">-->
 		<img id="coin" width="320" height="32" src="images/coin_spritesheet.png" alt="coin" style="display:none">
 		<img id="cache" src="" alt="cache" style="display:none">
+		<img id="dead" src="images/dead.png" alt="dead" style="display:none">
 		
 		
 		<script>
@@ -61,7 +62,7 @@
 			cell     = function(x,y)   {return tcell(p2t(x),p2t(y));    },
 			tcell    = function(tx,ty) {return cells[tx + (ty*MAP.tw)]; };
 			
-		var player = {x:t2p(3), y:0, moving:false, face:"left", speed:0, alive:1,frame:0, height:64, width:32, jump:false, fall: false};
+		var player = {x:t2p(3), y:0, moving:false, face:"left", speed:0, alive:true,frame:0, height:64, width:32, jump:false, fall: false};
 		
 						
 		var level001 = [
@@ -93,6 +94,7 @@
 		var playerImage = document.getElementById('deano');
 		var playerWalk = document.getElementById('deano_walk');
 		var coinImage = document.getElementById('coin');
+		var deadImage = document.getElementById('dead');
 		var coincount=0;
 		var frameDelay = 0;
 		var levelX = 0;
@@ -123,7 +125,9 @@
 			hitbox.complete &&
 			playerImage.complete &&
 			playerWalk.complete && 
-			coinImage.complete){
+			coinImage.complete &&
+			deadImage.complete
+			){
 				return;
 			}
 		};
@@ -151,30 +155,44 @@
 			};		
 		};
 
+		var deadYCount = 0;
+
+					
 		function updatePlayer(ctx){
 			var playerFrameCount = 6;
 			
-			movePlayer();
+			if(player.y > height){
+				player.alive = false;
+			};
 			
-			if(player.moving){
-				if(player.frame<playerFrameCount){
-					if(getAnimStep())
-						player.frame++;
+			if(player.alive){
+				movePlayer();
+				
+				if(player.moving){
+					if(player.frame<playerFrameCount){
+						if(getAnimStep())
+							player.frame++;
+					}else{
+						player.frame=0;
+					};
 				}else{
 					player.frame=0;
 				};
+				
+				if(player.face==="left"){
+					// image, slice x, slice y, slice width, slice height, dest x, dest y, dest width, dest height
+					ctx.drawImage(playerWalk, 32*player.frame,0,32,64,player.x,player.y,32,64);
+				
+					//ctx.drawImage(playerWalk, player.x, player.y);
+				
+				}else if(player.face === "right"){
+					mirrorImage(ctx, playerWalk, player.x, player.y, true, false, player.frame);
+				};
 			}else{
-				player.frame=0;
-			};
-			
-			if(player.face==="left"){
-				// image, slice x, slice y, slice width, slice height, dest x, dest y, dest width, dest height
-				ctx.drawImage(playerWalk, 32*player.frame,0,32,64,player.x,player.y,32,64);
-			
-				//ctx.drawImage(playerWalk, player.x, player.y);
-			
-			}else if(player.face === "right"){
-				mirrorImage(ctx, playerWalk, player.x, player.y, true, false, player.frame);
+				if(deadYCount<200)
+					deadYCount+=5;
+				drawTile(deadImage, 150, deadYCount);
+				
 			};
 		};
 		
@@ -200,11 +218,22 @@
 		
 		function collide(entity, position){
 			var collideX;
+			
+			
+			
+			if(entity.y + entity.height > height)return false;
 		
 			switch(position){
 				case "feet":
+					collideX = p2t(entity.x + invertNumber(levelX));
 					if(level001[p2t(entity.y+(entity.height))][collideX] || level001[p2t(entity.y+(entity.height-5))][p2t(entity.x+entity.width)] !== 0 )
 						return true;
+					
+					if(level001[p2t(entity.y+(entity.height))][collideX] || level001[p2t(entity.y+(entity.height-5))][p2t(entity.x+entity.width)] === 3 ){
+						level001[p2t(entity.y+(entity.height))][collideX] = 0;
+						level001[p2t(entity.y+(entity.height-5))][p2t(entity.x+entity.width)];
+					};
+					
 					break;
 
 				case "left":
@@ -226,12 +255,12 @@
 				default:
 					return false;
 					break;
-			}
-		}
+			};
+		};
 		
 		function logger(){
-			console.log(levelX*-1);
-		}
+			console.log("succes?");
+		};
 		
 		
 		
@@ -240,9 +269,7 @@
 			return window.performance.now();
 		  else
 			return new Date().getTime();
-		}
-		
-	
+		};
 		
 		var fps  = 60,
 			step = 1/fps,
@@ -252,8 +279,7 @@
 			
 		function bound(x, min, max) {
 			return Math.max(min, Math.min(max, x));
-		}
-			
+		};			
 
 		function frame() {
 		  now = timestamp();
@@ -331,50 +357,31 @@
 					};
 				};
 			};
-			//for(y=0;y<MAP.tileY;y++){
-			//	for(x=0;x<MAP.tileX+1;x++){
-            //
-			//		let arrayX = x - p2t(levelX);
-			//		var drawX = levelX + (x * TILE);
-			//		if(y > 0 && y < height){ 
-			//			switch(level001[y][arrayX]){
-			//				case 1:
-			//					if(y > 0 && level001[y-1][x] === 0){
-			//						drawTile(floor_00, levelX + drawX, y * TILE);
-			//					}else{
-			//						drawTile(floor_01, levelX + drawX, y * TILE);
-			//					};
-			//					break;
-			//				case 2:
-			//					drawTile(hitbox, levelX + drawX, y * TILE);
-			//					break;
-			//				case 3:
-			//					ctx.fillStyle = COLOR.SKY;
-			//					//draw a bg tile for every frame for the coin animation. This might cause issues id the BG is dynamic
-			//					ctx.fillRect(levelX + drawX, y * TILE, TILE, TILE);
-			//					drawCoin(ctx, levelX + drawX, y*TILE);
-			//					break;
-			//				default:
-			//					ctx.fillStyle = COLOR.SKY;
-			//					ctx.fillRect(levelX + drawX, y * TILE, TILE, TILE);
-			//					break;
-			//			};
-			//		};
-			//	};
-			//};
 		};
 		
 		var inLMS = true;
 		
-		try{ VarDirection; }
+		try{ trivPageScope; }
 		catch(e) {
 			if(e.name == "ReferenceError") {
 				inLMS = false;
 				console.log("not in lectora");
 				document.addEventListener('keydown', function(ev) { return onkey(ev, ev.keyCode, true);  }, false);
 				document.addEventListener('keyup',   function(ev) { return onkey(ev, ev.keyCode, false); }, false);
+			};
+			
+			
+			
+		};
+			
+		if(inLMS){
+		
+			console.log("in lectora");
+			var thePage = document.getElementById('pageDIV');
+			
+			thePage.addEventListener('keydown', function(ev) { return onkey(ev, ev.keyCode, true);  }, false);
+			thePage.addEventListener('keyup',   function(ev) { return onkey(ev, ev.keyCode, false); }, false);
 
-			}
 		};
 		
 		function onkey(ev, key, down) {
@@ -394,26 +401,20 @@
 		function update(dt){
 			drawLevel(ctx, dt);
 			updatePlayer(ctx);
+			console.log(player.alive);
 
 		};
 
 		var jumpState = false;
 		var jumpLimit;
 		
+		function aldronKeyUp(){
+			player.moving = false;
+		};
+		
+		
+		
 		function movePlayer(){
-			if(inLMS){
-				//This bit is currently not working, I need to adapt it to lectora's input methods
-				switch(VarDirection.getValue()) {
-					case "left":  player.moving = true; player.face = "left";console.log("you pressed the left key");break;
-					case "right": player.moving = true; player.face = "right";console.log("you pressed the right key");break;
-					case "space": player.jump = true;break;
-					default: 		player.moving = false;break;
-					//default: 		player.direction =  "stop";return false;break;
-				};
-				
-			}
-			
-			
 			
 			if(jumpState != player.jump && !player.fall){
 				jumpState = player.jump;
@@ -424,7 +425,6 @@
 			};
 			
 			if(player.jump && !player.fall){
-				console.log(jumpLimit);
 				if(player.y >= jumpLimit){
 					player.y-=5;
 				}else{
@@ -435,8 +435,6 @@
 			};
 			
 			if(player.fall && !collide(player, "feet")){
-				console.log("falling");
-				
 				player.y+=5;
 			}else{
 				player.fall = false;
