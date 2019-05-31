@@ -28,8 +28,8 @@
 		<img id="deano_walk" width="32" height="64" src="images/deano_spritesheet.png" alt="it's only flippin' Deano! Now he's only bloody walkin'!" style="display:none">
 		<!--<img id="deano_walk" width="32" height="64" src="images/apple_rick.png" alt="it's only flippin' Deano! Now he's only bloody walkin'!" style="display:none">-->
 		<img id="coin" width="320" height="32" src="images/coin_spritesheet.png" alt="coin" style="display:none">
-		<img id="mountains" width="1728" height="648" src="images/mountains.png" alt="mountains" style="display:none">
-		<img id="hills" width="1728" height="648" src="images/hills.png" alt="hills" style="display:none">
+		<img id="mountains" width="1728" height="648" src="images/mountains_3d.png" alt="mountains" style="display:none">
+		<img id="hills" width="5000" height="648" src="images/hills_3d.png" alt="hills" style="display:none">
 		<img id="sky" width="800" height="648" src="images/sky.jpg" alt="sky" style="display:none">
 		<img id="cloud" width="766" height="167" src="images/cloud.png" alt="cloud" style="display:none">
 		<img id="dead" src="images/dead.png" alt="dead" style="display:none">
@@ -123,21 +123,21 @@
 			}
 		};
 		
-		function loadImages(){
-			if(
-			floor_00.complete && 
-			floor_01.complete &&
-			hitbox.complete &&
-			playerImage.complete &&
-			playerWalk.complete && 
-			coinImage.complete &&
-			deadImage.complete
-			){
-				return;
-			}
-		};
-		
-		loadImages();
+		//function loadImages(){
+		//	if(
+		//	floor_00.complete && 
+		//	floor_01.complete &&
+		//	hitbox.complete &&
+		//	playerImage.complete &&
+		//	playerWalk.complete && 
+		//	coinImage.complete &&
+		//	deadImage.complete
+		//	){
+		//		return;
+		//	}
+		//};
+		//
+		//loadImages();
 		
 		function getAnimStep(){
 			if(frameDelay<6){
@@ -161,7 +161,6 @@
 		};
 
 		var deadYCount = 0;
-
 					
 		function updatePlayer(ctx){
 			var playerFrameCount = 9;
@@ -233,10 +232,6 @@
 					
 			switch(position){
 				case "feet":
-					
-                    
-					//clippingDebug(collideX, entity.y+entity.height, entity.width-20, 1);
-					
 					for(i=10;i<=entity.width-20;i++){
 						if(level001[p2t(entity.y+entity.height)][p2t(collideX+i)]>0){
 							return true;
@@ -246,10 +241,6 @@
 					break;
 
 				case "head":
-					
-                    
-					//clippingDebug(collideX, entity.y+entity.height, entity.width-20, 1);
-					
 					for(i=0;i<=entity.width-20;i++){
 						if(level001[p2t(entity.y)][p2t(collideX+i)]>0){
 							return true;
@@ -265,9 +256,6 @@
 							return true;
 						};
                     };
-					
-					//if(level001[p2t(entity.y)][collideX] 				|| level001[p2t(entity.y)][collideX] > 0 )
-					//	return true;
 					break;
                 
 				case "right":
@@ -278,18 +266,10 @@
 							return true;
 						};
                     };
-					
-					//if(level001[p2t(entity.y)][collideX] 	|| level001[p2t(entity.y)][collideX] > 0  )
-					//	return true;
 					break;
-			    
 			};
 			return false;
 		};
-		
-		function logger(){
-			console.log("succes?");
-		}; 
 		
 		function timestamp() {
 		  if (window.performance && window.performance.now)
@@ -332,8 +312,6 @@
 			//This works out the horizontal size (in pixels) of the level array			
 			var levelXSize = t2p(level001[1].length);
 			
-			//var arrayX = p2t(levelX*-1);
-		
 			//OPEN| These chunks sets the level X position and player X position for scrolling
 			if(player.x > upperBound && levelX < levelXSize){
 				levelX-=ACCEL;
@@ -375,7 +353,7 @@
 			
 			//Draw Background
 			
-			var bg_width = 1728;
+			var bg_width = 5000;
 			
 			drawTile(mountains, levelX/4, 0);
 			drawTile(mountains, levelX/4+bg_width, 0);
@@ -441,16 +419,12 @@
 				document.addEventListener('keydown', function(ev) { return onkey(ev, ev.keyCode, true);  }, false);
 				document.addEventListener('keyup',   function(ev) { return onkey(ev, ev.keyCode, false); }, false);
 			};
-			
-			
-			
 		};
 			
 		if(inLMS){
-		
 			console.log("in lectora");
 			var thePage = document.getElementById('pageDIV');
-			
+			console.log("does the page work? = " + thePage);
 			thePage.addEventListener('keydown', function(ev) { return onkey(ev, ev.keyCode, true);  }, false);
 			thePage.addEventListener('keyup',   function(ev) { return onkey(ev, ev.keyCode, false); }, false);
 
@@ -461,8 +435,6 @@
 					case KEY.SPACE: player.jump = true;break;
 					case KEY.LEFT:  player.moving = true; player.face = "left";/*console.log("you pressed the left key, player x:"+player.x)*/;break;
 					case KEY.RIGHT: player.moving = true; player.face = "right";/*console.log("you pressed the right key, player x:"+player.x)*/;break;
-
-					//default: 		player.direction =  "stop";return false;break;
 				};
 			}else{
 				player.moving =  false;
@@ -517,14 +489,7 @@
 						player.x = player.x + ACCEL;
 					if(player.face === "left")
 						player.x = player.x - ACCEL;
-				//}else{
-				//	if(player.face === "right")
-				//		player.x = player.x - ACCEL;
-				//	if(player.face === "left")
-				//		player.x = player.x + ACCEL;
 				};
-				
-				
 			}else{
 					player.speed = 0;
 			};
