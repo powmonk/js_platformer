@@ -26,7 +26,7 @@
 		<img id="hit_box" width="32" height="32" src="images/hit_box.png" alt="hit_box"style="display:none">
 		<img id="deano" width="32" height="64" src="images/deano_walk.gif" alt="it's only flippin' Deano!" style="display:none">
 		<img id="deano_walk" width="32" height="64" src="images/deano_spritesheet.png" alt="it's only flippin' Deano! Now he's only bloody walkin'!" style="display:none">
-		<img id="crab_apple" width="32" height="64" src="images/apple_rick.png" alt="uhhh..." style="display:none">
+		<img id="crab_apple" width="64" height="84" src="images/apple_rick_large.png" alt="uhhh..." style="display:none">
 		<img id="coin" width="320" height="32" src="images/coin_spritesheet.png" alt="coin" style="display:none">
 		<img id="mountains" width="1728" height="648" src="images/mountains_3d.png" alt="mountains" style="display:none">
 		<img id="hills" width="5000" height="648" src="images/hills_3d.png" alt="hills" style="display:none">
@@ -39,15 +39,16 @@
 			COLORS = [ COLOR.BLACK, COLOR.YELLOW, COLOR.SKY, COLOR.PINK, COLOR.PURPLE, COLOR.GREY, COLOR.WHITE ];
 
 		var MAP      = { tileX: 32, tileY: 20 }, // the size of the map (in tiles)
-			TILE     = 32,                 // the size of each tile (in game pixels)
-			METER    = TILE,               // abitrary choice for 1m
-			GRAVITY  = METER * 9.8 * 6,    // very exagerated gravity (6x)
-			MAXDX    = METER * 20,         // max horizontal speed (20 tiles per second)
-			MAXDY    = METER * 60,         // max vertical speed   (60 tiles per second)
-			//ACCEL    = MAXDX * 2,          // horizontal acceleration -  take 1/2 second to reach maxdx
-			ACCEL    = 5,          //I'm too lazy to work out the physics so I'm just using fixed values for now
-			FRICTION = MAXDX * 6,          // horizontal friction     -  take 1/6 second to stop from maxdx
-			JUMP     = METER * 1500;       // (a large) instantaneous jump impulse
+			TILE     = 32,                 	// the size of each tile (in game pixels)
+			METER    = TILE,               	// abitrary choice for 1m
+			//GRAVITY  = METER * 9.8 * 6,   // very exagerated gravity (6x)
+			GRAVITY  = 7,    				//I'm too lazy to work out the physics so I'm just using fixed values for now
+			MAXDX    = METER * 20,         	// max horizontal speed (20 tiles per second)
+			MAXDY    = METER * 60,         	// max vertical speed   (60 tiles per second)
+			//ACCEL    = MAXDX * 2,         // horizontal acceleration -  take 1/2 second to reach maxdx
+			ACCEL    = 5,          			//I'm too lazy to work out the physics so I'm just using fixed values for now
+			FRICTION = MAXDX * 6,          	// horizontal friction     -  take 1/6 second to stop from maxdx
+			JUMP     = METER * 1500;       	// (a large) instantaneous jump impulse
 			KEY      = { SPACE: 32, LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
 			
 
@@ -60,9 +61,26 @@
 			p2t      = function(p)     {return Math.floor(p/TILE);      },
 			cell     = function(x,y)   {return tcell(p2t(x),p2t(y));    },
 			tcell    = function(tx,ty) {return cells[tx + (ty*MAP.tw)]; };
-			
-		var player 	= {x:t2p(3), y:0, moving:false, face:"left", speed:0, alive:true,frame:0, height:64, width:32, jump:false, fall: false};
-		var clouds 	= {x:0,y:0,speed:10};
+		
+		var floor_00 		= document.getElementById('floor_tile_00');
+		var floor_01 		= document.getElementById('floor_tile_01');
+		var hitbox 			= document.getElementById('hit_box');
+		var playerImage 	= document.getElementById('deano');
+		var playerWalk 		= document.getElementById('deano_walk');
+		var badAppleWalk 	= document.getElementById('crab_apple');
+		var coinImage 		= document.getElementById('coin');
+		var deadImage 		= document.getElementById('dead');
+		var mountains 		= document.getElementById('mountains');
+		var hills 			= document.getElementById('hills');
+		var sky 			= document.getElementById('sky');
+		var cloud 			= document.getElementById('cloud');
+		var coincount		= 0;
+		var frameDelay 		= 0;
+		var levelX 			= 0;
+		var cloudX 			= 1024
+		
+		var player 			= {image:playerWalk, x:t2p(3), y:0, moving:false, face:"left", speed:0, alive:true,frame:0, height:64, width:32, jump:false, fall: false};
+		var clouds 			= {x:0,y:0,speed:10};
 						
 		var level001 = [
 		[1,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -78,14 +96,17 @@
 		[1,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
 		[1,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,1,1,1,1,1,0,0,0,1,1,1,1,1,0,1,0,0,0,0,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
 		[1,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-		[1,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-		[1,0,0,0,0,0,0,0,0,0,0,2,-3,2,-3,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+		[1,0,0,0,0,0,0,0,0,0,0,2,-3,2,-3,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+		[1,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
 		[1,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
 		[1,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
 		[1,0,1,1,1,1,1,1,1,1,1,1, 1,1, 1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
 		[1,0,1,0,1,0,1,0,1,0,1,1, 1,1, 1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
 		[1,1,1,1,1,1,1,1,1,1,1,1, 1,1, 1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 		];
+		
+		var levelXSize 		= t2p(level001[1].length);
+
 		
 		if (!window.requestAnimationFrame) { // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
 			window.requestAnimationFrame = window.webkitRequestAnimationFrame || 
@@ -97,22 +118,7 @@
 				}
 			}
 		
-		var floor_00 = document.getElementById('floor_tile_00');
-		var floor_01 = document.getElementById('floor_tile_01');
-		var hitbox = document.getElementById('hit_box');
-		var playerImage = document.getElementById('deano');
-//		var playerWalk = document.getElementById('deano_walk');
-		var playerWalk = document.getElementById('crab_apple');
-		var coinImage = document.getElementById('coin');
-		var deadImage = document.getElementById('dead');
-		var mountains = document.getElementById('mountains');
-		var hills = document.getElementById('hills');
-		var sky = document.getElementById('sky');
-		var cloud = document.getElementById('cloud');
-		var coincount=0;
-		var frameDelay = 0;
-		var levelX = 0;
-		var cloudX = 1024
+
 		
 		function initPlayer(){
 			//player.x = 3 * TILE;
@@ -148,8 +154,7 @@
 				};
 			};
 		};
-		
-		
+
 		//function loadImages(){
 		//	if(
 		//	floor_00.complete && 
@@ -189,49 +194,73 @@
 
 		var deadYCount = 0;
 					
-					
-					
-		function updatePlayer(ctx){
-			var playerFrameCount = 6;
-			
-			
-			if(player.y > height){
-				player.alive = false;
+		function monsterMash(entity){
+			if(entity.face==="left"){
+				entity.x--;
+			}else{
+				entity.x++;
 			};
 			
-			if(player.alive){
-				movePlayer();
-				
-				if(player.moving){
-					if(player.frame<playerFrameCount){
-						if(getAnimStep())
-							player.frame++;
-					}else{
-						player.frame=0;
-					};
+			if(collide(entity, entity.face) || !collide(entity, "feet")){
+				if(entity.face === "left"){
+					entity.face = "right";
 				}else{
-					player.frame=0;
+					entity.face = "left";
 				};
-				
-				if(player.face==="left"){
-					// image, slice x, slice y, slice width, slice height, dest x, dest y, dest width, dest height
-					ctx.drawImage(playerWalk, 32*player.frame,0,32,64,player.x,player.y+3,32,64);
-				
-					//ctx.drawImage(playerWalk, player.x, player.y);
-				
-				}else if(player.face === "right"){
-					mirrorImage(ctx, playerWalk, player.x, player.y+3, true, false, player.frame);
-				};
-			}else{
-				if(deadYCount<200)
-				if(deadYCount<200)
-					deadYCount+=5;
-				drawTile(deadImage, 150, deadYCount);
-				
+			};
+			
+			if(!collide(entity, "feet")){
+				entity.y+=GRAVITY;
 			};
 		};
+					
+		function updateEntity(entity, ctx){
+			if(entity.y > height){
+				entity.alive = false;
+			};
+			
+			if(entity.alive){
+				if(entity === player){
+					movePlayer();
+				}else{
+					monsterMash(entity);
+				};
+				
+				if(entity.moving){
+					if(entity.frame<entity.frameCount){
+						if(getAnimStep())
+							entity.frame++;
+					}else{
+						entity.frame=0;
+					};
+				}else{
+					entity.frame=0;
+				};
+				
+				
+				
+				if(entity.face==="left"){
+					// image, slice x, slice y, slice width, slice height, dest x, dest y, dest width, dest height
+					ctx.drawImage(entity.image, entity.width*entity.frame,0,entity.width,entity.height,entity.x,entity.y+3,entity.width,entity.height);
+				}else if(entity.face === "right"){
+					mirrorImage(ctx, entity, true, false, entity.frame);
+				};
+			}else{
+				if(entity === player){
+					if(deadYCount<200)
+					if(deadYCount<200)
+						deadYCount+=5;
+					drawTile(deadImage, 150, deadYCount);
+				};
+				
+			};
+		};	
+					
+		function mirrorImage(ctx, entity, horizontal = false, vertical = false, frame){
 		
-		function mirrorImage(ctx, image, x, y, horizontal = false, vertical = false, frame){
+			var image = entity.image;
+			let x = entity.x;
+			let y = entity.y;
 			
 			ctx.save();  // save the current canvas state
 			
@@ -241,13 +270,13 @@
 			var d = vertical ? -1 : 1; //// set the direction of y axis
 //			var e = x + horizontal ? image.width : 0; // set the x origin
 //			var f = y + vertical ? image.height : 0 ; // set the y origin
-			var e = horizontal ? x + image.width : x; // set the x origin
-			var f = vertical   ? y + image.height: y; // set the y origin
+			var e = horizontal ? x + entity.width : x; // set the x origin
+			var f = vertical   ? y + entity.height: y; // set the y origin
 			
 			
 			ctx.setTransform(a,b,c,d,e,f);
 			//ctx.drawImage(image,0,0);
-			ctx.drawImage(image, 32*frame,0,32,64,0,0,32,64);
+			ctx.drawImage(image, entity.width*frame,0,entity.width,entity.height,0,0,entity.width,entity.height);
 			ctx.restore(); // restore the state as it was when this function was called
 		};		
 		
@@ -263,40 +292,21 @@
 					
 			switch(position){
 				case "feet":
-					for(i=10;i<=entity.width-20;i++){
-						if(level001[p2t(entity.y+entity.height)][p2t(collideX+i)]>0){
-							return true;
-						};
-                    };
-
+					for(i=10;i<=entity.width-20;i++)
+						if(level001[p2t(entity.y+entity.height)][p2t(collideX+i)]>0){return true;};
 					break;
-
 				case "head":
-					for(i=0;i<=entity.width-20;i++){
-						if(level001[p2t(entity.y)][p2t(collideX+i)]>0){
-							return true;
-						};
-                    };
-
+					for(i=0;i<=entity.width-20;i++)
+						if(level001[p2t(entity.y)][p2t(collideX+i)]>0){return true;};
 					break;
-
 				case "left":
-				
-					for(i=entity.height-10;i>5;i--){
-						if(level001[p2t(entity.y+i)][p2t(collideX)]>0){
-							return true;
-						};
-                    };
+					for(i=entity.height-10;i>5;i--)
+						if(level001[p2t(entity.y+i)][p2t(collideX)]>0){return true;};
 					break;
-                
 				case "right":
 					collideX = collideX + entity.width;
-					
-					for(i=entity.height-10;i>5;i--){
-						if(level001[p2t(entity.y+i)][p2t(collideX)]>0){
-							return true;
-						};
-                    };
+					for(i=entity.height-10;i>5;i--)
+						if(level001[p2t(entity.y+i)][p2t(collideX)]>0){return true;};
 					break;
 			};
 			return false;
@@ -334,17 +344,20 @@
 		
 		function invertNumber(numberToInvert){
 			return numberToInvert * -1;
-		};
-		
-		
+		};	
+
+		//Create rain array
 		var rain = [];
 		
+		//Create a loop which add objects to the rain array
 		function initRain(){
 			for (i=0;i<500;i++)
 				rain.push({x:Math.floor(Math.random() * 1500), y:Math.floor(Math.random() * 648)});
 		};
 		
 		initRain();
+		
+		
 		
 		console.log(rain);
 		
@@ -381,8 +394,6 @@
 			//These two variable set the portions of the screen that trigger scrolling of the level
 			var upperBound = TILE * 22;
 			var lowerBound = TILE * 10;
-			//This works out the horizontal size (in pixels) of the level array			
-			var levelXSize = t2p(level001[1].length);
 			
 			//OPEN| These chunks sets the level X position and player X position for scrolling
 			if(player.x > upperBound && levelX < levelXSize){
@@ -423,7 +434,8 @@
 			
 			drawTile(sky, 0, 0);
 			
-			//Draw Background
+			//Draw Background (This is a mess)
+			//TODO make this bit sane
 			
 			var bg_width = 5000;
 			
@@ -520,7 +532,9 @@
 		function update(dt){
 			//drawNoise();
 			drawLevel(ctx, dt);
-			updatePlayer(ctx);
+			updateEntity(player, ctx)
+			for(i=0;i<baddies.length;i++)
+				updateEntity(baddies[i], ctx)
 		};
 
 		var jumpState = false;
@@ -551,7 +565,7 @@
 			};
 			
 			if(player.fall && !collide(player, "feet")){
-				player.y+=7;
+				player.y+=GRAVITY;
 			}else{
 				player.fall = false;
 			};
@@ -571,6 +585,52 @@
 					player.speed = 0;
 			};
 		};
+		
+		//Create baddie array
+		var baddies = [];
+		
+		function initBaddies(){
+			let baddieNum = 2;
+			for (i=0;i<baddieNum;i++){
+//				let xPos = Math.floor(((levelXSize / baddieNum) * i)* TILE);
+				let xPos =  32* i;
+				baddies.push({image: badAppleWalk,x:t2p(3), y:200, moving:true, face:"left", speed:0, alive:true,frame:0,frameCount:6, height:84, width:64, jump:false, fall: false});
+				baddies[i].x = xPos + TILE*10;
+			};
+			console.log(baddies);
+			for(i=0;i<baddieNum;i++){
+				console.log(i);
+
+				let exitCond = false;
+
+				tempEntity = baddies[i];
+				
+				while(!collide(tempEntity, "feet")){
+					tempEntity.y++;
+				};
+			};
+			
+			console.log(baddies);
+			
+		};
+		
+		initBaddies();
+		
+		//function drawBaddies(ctx){
+		//	
+		//	for(i=0;i<baddies.length;i++){
+		//		if(baddies[i].face==="left"){
+		//			// image, slice x, slice y, slice width, slice height, dest x, dest y, dest width, dest height
+		//			ctx.drawImage(badAppleWalk, baddies[i].width*baddies[i].frame,0,baddies[i].width,baddies[i].height,baddies[i].x,baddies[i].y,baddies[i].width,baddies[i].height);
+		//		}else if(baddies[i].face === "right"){
+		//			mirrorImage(ctx, badAppleWalk, levelX - baddies[i].x, baddies[i].y, true, false, baddies[i].frame);
+		//		};			
+        //
+		//	//ctx.drawImage(badAppleWalk, levelX + baddies[i].x, baddies[i].y);
+		//	};
+		//	
+		//	
+		//};
 		</script>
 	</body>
 </html>
