@@ -717,9 +717,10 @@
 			// This is a temporary array we use to put the updated array data after the GOL rules
 			// have been applied, based on the data from the old array. Once we're done with it
 			// we'll put the data back into the original array.
-			var newCave = caves;
 			
-			for(i=0;i<1;i++){
+			for(i=0;i<2;i++){
+				var newCave = caves;
+
 				// This loop checks 
 				for(x=0;x<caveSize;x++){
 					for(y=0;y<caveSize;y++){
@@ -728,14 +729,54 @@
 				};
 
 				caves = newCave;
+				// This loop checks 
+				for(x=0;x<caveSize;x++){
+					for(y=0;y<caveSize;y++){
+						newCave[x][y] = liveDie(caves, x, y);
+					};
+				};
+
+				caves = newCave;
+				// This loop checks 
+				for(x=0;x<caveSize;x++){
+					for(y=0;y<caveSize;y++){
+						newCave[x][y] = liveDie(caves, x, y);
+					};
+				};
+
+				caves = newCave;
+				// This loop checks 
+				for(x=0;x<caveSize;x++){
+					for(y=0;y<caveSize;y++){
+						newCave[x][y] = liveDie(caves, x, y);
+					};
+				};
+
+				caves = newCave;
+				
+					// This loop checks 
+				for(x=0;x<caveSize;x++){
+					for(y=0;y<caveSize;y++){
+						newCave[x][y] = liveDie(caves, x, y);
+					};
+				};
+				caves = newCave;
+				
+					// This loop checks 
+				for(x=0;x<caveSize;x++){
+					for(y=0;y<caveSize;y++){
+						newCave[x][y] = liveDie(caves, x, y);
+					};
+				};
+				caves = newCave;
 			};
 		};
 		
 		// This function checks the surrounding 8 cells and decides whether or not the current cell should live or die
 		function liveDie(array2d, x, y){
 			var count = 0;
-			var birthLimit = 3;
-			var deathLimit = 6;
+			var birthLimit = 5;
+			var deathLimit = 4;
 
 			for(i=-1;i<2;i++){
 				for(j=-1;j<2;j++){
@@ -745,8 +786,8 @@
 					
 					neighbourX = x+i;
 					neighbourY = y+j;
-					
-					if(neighbourX < 0 || neighbourX > caveSize -1 || neighbourY < 0 || neighbourX > caveSize-1){
+
+					if(neighbourX < 0 || neighbourX > caveSize -1 || neighbourY < 0 || neighbourX > caveSize - 1){
 						return 0;
 					}else if(caves[neighbourX][neighbourY] === 1){
 						count++;
@@ -764,7 +805,7 @@
 		initCave();
 		
 		function drawCave(){
-			var tileSize = TILE/4;
+			var tileSize = Math.floor(TILE/4);
 
 			for(x=0;x<caveSize;x++){
 				for(y=0;y<caveSize;y++){
