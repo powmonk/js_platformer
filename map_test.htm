@@ -443,10 +443,6 @@
 		
 		initRain();
 		
-		
-		
-		console.log(rain);
-		
 		function droplet(getSet, position, x, y){
 			switch(getSet){
 				case 'set':
@@ -459,7 +455,6 @@
 					return [rain[position].x, rain[position].y];
 			};
 		};
-
 		
 		function drawRain(ctx){
 			for(i=0;i<500;i++){
@@ -474,7 +469,6 @@
 				};
 			};
 		};
-			
 				
 		function drawLevel(ctx){
 			//These two variable set the portions of the screen that trigger scrolling of the level
@@ -638,7 +632,7 @@
 				
 				jumpLimit = player.y - player.height * 2;
 				
-				console.log("You just jumped");
+				//console.log("You just jumped");
 			};
 			
 			if(player.jump && !player.fall){
@@ -684,9 +678,8 @@
 				baddies.push({image: badAppleWalk,x:t2p(3), y:200, moving:true, face:"left", speed:0, alive:true,frame:0,frameCount:6, height:84, width:64, jump:false, fall: false});
 				baddies[i].x = xPos + TILE*10;
 			};
-			console.log(baddies);
+			//console.log(baddies);
 			for(i=0;i<baddieNum;i++){
-				console.log(i);
 
 				let exitCond = false;
 
@@ -696,9 +689,6 @@
 					tempEntity.y++;
 				};
 			};
-			
-			console.log(baddies);
-			
 		};
 		
 		initBaddies();
@@ -770,10 +760,55 @@
 				};
 				caves = newCave;
 			};
+			
+			caveNumber(caves);
 		};
 		
-		// This function checks the surrounding 8 cells and decides whether or not the current cell should live or die
+		function caveNumber(array2d){
+			var caveCount = 2;
+			
+			console.log('CaveNumber hit');
+			
+			for(x=0;x<caveSize;x++){		
+				for(y=0;y<caveSize;y++){
+					
+
+					if(array2d[x][y] === 1){
+						var chamberSize  = 0;
+						chamberSize = floodFill(array2d, x, y, ++caveCount, chamberSize);
+						console.log(chamberSize);
+					};
+				};
+			};
+		};
+		
+		//TODO write this function
+		function floodFill(array2d, x, y, value, chamberSize){
+			// This function is used to flood fill each cave with a 'value' to identify distinct caves.
+			// It also returns the size of the cave.			
+			//console.log('floodfill hit');
+			
+			if(array2d[x][y] != 1){
+				return 0;
+			}else{
+				chamberSize++;
+				
+				console.log(chamberSize);
+
+				array2d[x][y] = value;
+
+				floodFill(array2d, x + 1, y, value, chamberSize); // right
+				floodFill(array2d, x - 1, y, value, chamberSize); // left
+				floodFill(array2d, x, y + 1, value, chamberSize); // down
+				floodFill(array2d, x, y - 1, value, chamberSize); // up
+
+				return chamberSize;
+
+			};
+		};
+		
 		function liveDie(array2d, x, y){
+			// This function checks the surrounding 8 cells and decides whether or not the current cell should live or die
 			var count = 0;
 			var birthLimit = 5;
 			var deathLimit = 4;
@@ -787,7 +822,7 @@
 					neighbourX = x+i;
 					neighbourY = y+j;
 
-					if(neighbourX < 0 || neighbourX > caveSize -1 || neighbourY < 0 || neighbourX > caveSize - 1){
+					if(neighbourX < 0 || neighbourX > caveSize -1 || neighbourY < 0 || neighbourY > caveSize){
 						return 0;
 					}else if(caves[neighbourX][neighbourY] === 1){
 						count++;
@@ -809,13 +844,46 @@
 
 			for(x=0;x<caveSize;x++){
 				for(y=0;y<caveSize;y++){
-					if(caves[x][y]===1){
-						ctx.fillStyle = COLOR.PINK;
-						ctx.fillRect(x*tileSize, y*tileSize, tileSize, tileSize);
-					}else{
-						ctx.fillStyle = COLOR.BLACK;
-						ctx.fillRect(x*tileSize, y*tileSize, tileSize, tileSize);
-					};
+					switch(caves[x][y]){
+						case 0:
+							ctx.fillStyle = COLOR.BLACK;break;
+						case 2:
+							ctx.fillStyle = COLOR.SKY;break;
+						case 3:
+							ctx.fillStyle = COLOR.YELLOW;break;
+						case 4:
+							ctx.fillStyle = COLOR.PINK;break;
+						case 5:
+							ctx.fillStyle = COLOR.SKY;break;
+						case 6:
+							ctx.fillStyle = COLOR.YELLOW;break;
+						case 7:
+							ctx.fillStyle = COLOR.PINK;break;
+						case 8:
+							ctx.fillStyle = COLOR.SKY;break;
+						case 9:
+							ctx.fillStyle = COLOR.YELLOW;break;
+						case 10:
+							ctx.fillStyle = COLOR.PINK;break;
+						case 11:
+							ctx.fillStyle = COLOR.SKY;break;
+						case 12:
+							ctx.fillStyle = COLOR.YELLOW;break;
+						case 13:
+							ctx.fillStyle = COLOR.PINK;break;
+						default:
+							ctx.fillStyle = COLOR.GREY;break;
+							//console.log('A cave has been found...?');break;
+					}
+					ctx.fillRect(x*tileSize, y*tileSize, tileSize, tileSize);
+				
+					//if(caves[x][y]===0){
+					//	ctx.fillStyle = COLOR.BLACK;
+					//	ctx.fillRect(x*tileSize, y*tileSize, tileSize, tileSize);
+					//}else{
+					//	ctx.fillStyle = COLOR.PINK;
+					//	ctx.fillRect(x*tileSize, y*tileSize, tileSize, tileSize);
+					//};
 				};
 			};
 		};
