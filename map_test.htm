@@ -2,7 +2,7 @@
 <html lang="en"> 
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-		<title>Test Game</title>
+		<title>Dynamic Map Test</title>
 		<style type="text/css">
 			canvas {
 				width: 1024px;
@@ -35,8 +35,8 @@
 		<img id="dead" src="images/dead.png" alt="dead" style="display:none">
 		<script>
 		
-		var COLOR  = { BLACK: '#000000', YELLOW: '#ECD078', SKY: '#8888FF', PINK: '#C02942', PURPLE: '#542437', GREY: '#333', SLATE: '#53777A', WHITE: '#FFFFFF' },
-			COLORS = [ COLOR.BLACK, COLOR.YELLOW, COLOR.SKY, COLOR.PINK, COLOR.PURPLE, COLOR.GREY, COLOR.WHITE ];
+		var COLOR  = { BLACK: '#000000', YELLOW: '#ECD044', SKY: '#8888FF', PINK: '#C02942', PURPLE: '#542437', GREY: '#333', SLATE: '#53777A', WHITE: '#FFFFFF', GREE: '#0A0' },
+			COLORS = [ COLOR.BLACK, COLOR.YELLOW, COLOR.SKY, COLOR.PINK, COLOR.PURPLE, COLOR.GREY, COLOR.WHITE, COLOR.GREEN ];
 
 		var MAP      = { tileX: 32, tileY: 20 }, // the size of the map (in tiles)
 			TILE     = 32,                 	// the size of each tile (in game pixels)
@@ -776,7 +776,7 @@
 						chamberSize  = 0;
 						floodFill(array2d, x, y, chamberCount);
 						console.log('Chamber '+chamberCount+' is '+chamberSize);
-						if(chamberSize < 66){
+						if(chamberSize < 20){
 							console.log('Chamber '+chamberCount+' is too small');
 							chambersToCull.push(chamberCount);
 						};
@@ -827,8 +827,8 @@
 		function liveDie(array2d, x, y){
 			// This function checks the surrounding 8 cells and decides whether or not the current cell should live or die
 			var count = 0;
-			var birthLimit = 4; // def 5
-			var deathLimit = 5; // def 4
+			var birthLimit = 5; // def 5
+			var deathLimit = 4; // def 4
 
 			for(i=-1;i<2;i++){
 				for(j=-1;j<2;j++){
@@ -867,11 +867,26 @@
 						case 0://Walls
 							ctx.fillStyle = COLOR.BLACK;break;
 						default:
-							if(caves[x][y] % 2 === 0){
-								ctx.fillStyle = COLOR.PINK;break;
-							}else{
+						
+							if(caves[x][y] % 5 === 0){
+								ctx.fillStyle = COLOR.GREEN;break;
+							};
+							
+							if(caves[x][y] % 4 === 0){
+								ctx.fillStyle = COLOR.WHITE;break;
+							};
+							
+							if(caves[x][y] % 3 === 0){
 								ctx.fillStyle = COLOR.YELLOW;break;
 							};
+							
+							if(caves[x][y] % 2 === 0){
+								ctx.fillStyle = COLOR.SKY;break;
+							};
+							if(caves[x][y] % 1 === 0){
+								ctx.fillStyle = COLOR.GREY;break;
+							};
+	
 					};
 					ctx.fillRect(x*tileSize, y*tileSize, tileSize, tileSize);
 					//ctx.fillStyle = COLOR.BLACK;break;
