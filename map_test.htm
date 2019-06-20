@@ -764,45 +764,62 @@
 			caveNumber(caves);
 		};
 		
+		var chamberSize  = 0;
+		
 		function caveNumber(array2d){
-			var caveCount = 2;
-			
-			console.log('CaveNumber hit');
+			var chamberCount = 2;
+			var chambersToCull = [];
 			
 			for(x=0;x<caveSize;x++){		
 				for(y=0;y<caveSize;y++){
-					
-
 					if(array2d[x][y] === 1){
-						var chamberSize  = 0;
-						chamberSize = floodFill(array2d, x, y, ++caveCount, chamberSize);
-						console.log(chamberSize);
+						chamberSize  = 0;
+						floodFill(array2d, x, y, chamberCount);
+						console.log('Chamber '+chamberCount+' is '+chamberSize);
+						if(chamberSize < 66){
+							console.log('Chamber '+chamberCount+' is too small');
+							chambersToCull.push(chamberCount);
+						};
+						chamberCount++;
 					};
 				};
 			};
+			
+			for(i=0;i<chambersToCull.length;i++){
+				cullChamber(array2d, chambersToCull[i]);
+			};
+			
+			console.log(chamberCount);
 		};
 		
-		//TODO write this function
-		function floodFill(array2d, x, y, value, chamberSize){
+		function cullChamber(array2d, chamberToCull){
+
+			for(x=0;x<array2d[1].length;x++){		
+				for(y=0;y<array2d[1].length;y++){
+					if(array2d[x][y] === chamberToCull)
+						array2d[x][y] = 0;
+				};
+			};			
+		};
+		
+		function floodFill(array2d, x, y, value){
 			// This function is used to flood fill each cave with a 'value' to identify distinct caves.
 			// It also returns the size of the cave.			
-			//console.log('floodfill hit');
 			
 			if(array2d[x][y] != 1){
-				return 0;
+				return chamberSize;
 			}else{
-				chamberSize++;
-				
-				console.log(chamberSize);
+				++chamberSize
+				//console.log(chamberSize);
 
 				array2d[x][y] = value;
 
-				floodFill(array2d, x + 1, y, value, chamberSize); // right
-				floodFill(array2d, x - 1, y, value, chamberSize); // left
-				floodFill(array2d, x, y + 1, value, chamberSize); // down
-				floodFill(array2d, x, y - 1, value, chamberSize); // up
+				floodFill(array2d, x + 1, y, value); // right
+				floodFill(array2d, x - 1, y, value); // left
+				floodFill(array2d, x, y + 1, value); // down
+				floodFill(array2d, x, y - 1, value); // up
 
-				return chamberSize;
+				return 1;
 
 			};
 		};
@@ -810,8 +827,8 @@
 		function liveDie(array2d, x, y){
 			// This function checks the surrounding 8 cells and decides whether or not the current cell should live or die
 			var count = 0;
-			var birthLimit = 5;
-			var deathLimit = 4;
+			var birthLimit = 4; // def 5
+			var deathLimit = 5; // def 4
 
 			for(i=-1;i<2;i++){
 				for(j=-1;j<2;j++){
@@ -839,51 +856,28 @@
 		
 		initCave();
 		
+		console.log(caves);
+		
 		function drawCave(){
 			var tileSize = Math.floor(TILE/4);
 
 			for(x=0;x<caveSize;x++){
 				for(y=0;y<caveSize;y++){
 					switch(caves[x][y]){
-						case 0:
+						case 0://Walls
 							ctx.fillStyle = COLOR.BLACK;break;
-						case 2:
-							ctx.fillStyle = COLOR.SKY;break;
-						case 3:
-							ctx.fillStyle = COLOR.YELLOW;break;
-						case 4:
-							ctx.fillStyle = COLOR.PINK;break;
-						case 5:
-							ctx.fillStyle = COLOR.SKY;break;
-						case 6:
-							ctx.fillStyle = COLOR.YELLOW;break;
-						case 7:
-							ctx.fillStyle = COLOR.PINK;break;
-						case 8:
-							ctx.fillStyle = COLOR.SKY;break;
-						case 9:
-							ctx.fillStyle = COLOR.YELLOW;break;
-						case 10:
-							ctx.fillStyle = COLOR.PINK;break;
-						case 11:
-							ctx.fillStyle = COLOR.SKY;break;
-						case 12:
-							ctx.fillStyle = COLOR.YELLOW;break;
-						case 13:
-							ctx.fillStyle = COLOR.PINK;break;
 						default:
-							ctx.fillStyle = COLOR.GREY;break;
-							//console.log('A cave has been found...?');break;
-					}
+							if(caves[x][y] % 2 === 0){
+								ctx.fillStyle = COLOR.PINK;break;
+							}else{
+								ctx.fillStyle = COLOR.YELLOW;break;
+							};
+					};
 					ctx.fillRect(x*tileSize, y*tileSize, tileSize, tileSize);
-				
-					//if(caves[x][y]===0){
-					//	ctx.fillStyle = COLOR.BLACK;
-					//	ctx.fillRect(x*tileSize, y*tileSize, tileSize, tileSize);
-					//}else{
-					//	ctx.fillStyle = COLOR.PINK;
-					//	ctx.fillRect(x*tileSize, y*tileSize, tileSize, tileSize);
-					//};
+					//ctx.fillStyle = COLOR.BLACK;break;
+					//ctx.font = "8px Georgia";
+					//ctx.fillText(caves[x][y], x*tileSize, y*tileSize);
+					
 				};
 			};
 		};
